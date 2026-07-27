@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  >
+
+  <meta
+    name="description"
+    content="NC Reward DApp on BNB Smart Chain"
+  >
+
+  <title>NC Reward</title>
+
+  <link rel="stylesheet" href="./style.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js"></script>
+</head>
+
+<body>
+
+  <!-- Loading -->
+  <div id="loadingOverlay" class="loading-overlay hidden">
+    <div class="loader"></div>
+    <div id="loadingText">กำลังโหลด...</div>
+  </div>
+
+
+  <!-- Notification -->
+  <div id="notification" class="notification hidden">
+    <div>
+      <strong id="notificationTitle">แจ้งเตือน</strong>
+      <p id="notificationMessage"></p>
+    </div>
+
+    <button
+      id="closeNotificationBtn"
+      class="notification-close"
+      type="button"
+    >
+      ×
+    </button>
+  </div>
+
+
+  <!-- Header -->
+  <header class="topbar">
+
+    <div class="brand">
+      <div class="brand-logo">NC</div>
+
+      <div>
+        <h1>NC Reward</h1>
+        <span>BNB Smart Chain</span>
+      </div>
+    </div>
+
+    <button
+      id="connectWalletBtn"
+      class="connect-btn"
+      type="button"
+    >
+      <span>🔗</span>
+      <span id="connectWalletText">Connect Wallet</span>
+    </button>
+
+  </header>
+
+
+  <main class="container">
+
+    <!-- Hero -->
+    <section class="hero">
+
+      <div>
+        <span class="hero-badge">NC REWARD ECOSYSTEM</span>
+
+        <h2>
+          Reward
+          <span>Auto Stake</span>
+          365 Days
+        </h2>
+
+        <p>
+          สะสมยอดองค์กร รับรางวัล และนำรางวัลเข้าสู่ระบบ Stake
+          โดยอัตโนมัติ
+        </p>
+      </div>
+
+      <div class="wallet-box">
+
+        <div class="wallet-status-row">
+          <span>Wallet Status</span>
+
+          <strong id="walletStatus" class="status-offline">
+            Not Connected
+          </strong>
+        </div>
+
+        <div id="walletAddress" class="wallet-address">
+          -
+        </div>
+
+        <div class="wallet-detail">
+          <span>Network</span>
+          <strong id="networkName">BNB Smart Chain</strong>
+        </div>
+
+        <div class="wallet-detail">
+          <span>NC Balance</span>
+          <strong id="ncBalance">0 NC</strong>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- Dashboard -->
+    <section class="section">
+
+      <div class="section-title">
+        <div>
+          <small>DASHBOARD</small>
+          <h2>ภาพรวมบัญชี</h2>
+        </div>
+
+        <button
+          id="refreshBtn"
+          class="secondary-btn"
+          type="button"
+        >
+          Refresh
+        </button>
+      </div>
+
+
+      <div class="stats-grid">
+
+        <article class="stat-card">
+          <span>Rank</span>
+          <strong id="userRank">-</strong>
+          <small>อันดับปัจจุบัน</small>
+        </article>
+
+        <article class="stat-card">
+          <span>Organization Volume</span>
+          <strong id="organizationVolume">0 NC</strong>
+          <small>ยอดองค์กรสะสม</small>
+        </article>
+
+        <article class="stat-card">
+          <span>Claimable Reward</span>
+          <strong id="claimableReward">0 NC</strong>
+          <small>รางวัลที่สามารถเคลมได้</small>
+        </article>
+
+        <article class="stat-card">
+          <span>Claimable Units</span>
+          <strong id="claimableUnits">0</strong>
+          <small>จำนวนรอบที่เคลมได้</small>
+        </article>
+
+        <article class="stat-card">
+          <span>Total Claimed</span>
+          <strong id="totalClaimed">0 NC</strong>
+          <small>รางวัลที่เคลมแล้ว</small>
+        </article>
+
+        <article class="stat-card">
+          <span>Total Staked</span>
+          <strong id="totalStaked">0 NC</strong>
+          <small>ยอด Stake ทั้งหมด</small>
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- Reward Progress -->
+    <section class="section">
+
+      <div class="section-title">
+        <div>
+          <small>REWARD PROGRESS</small>
+          <h2>ความคืบหน้ารางวัล</h2>
+        </div>
+      </div>
+
+
+      <div class="panel">
+
+        <div class="progress-head">
+          <div>
+            <span>ยอดสะสมรอบปัจจุบัน</span>
+            <strong id="currentProgressText">0 / 20,000 NC</strong>
+          </div>
+
+          <strong id="progressPercent">0%</strong>
+        </div>
+
+        <div class="progress-track">
+          <div
+            id="organizationProgressBar"
+            class="progress-bar"
+          ></div>
+        </div>
+
+        <div class="info-list">
+
+          <div>
+            <span>Claim Step</span>
+            <strong id="claimStep">20,000 NC</strong>
+          </div>
+
+          <div>
+            <span>Organization Target</span>
+            <strong id="organizationTarget">20,000 NC</strong>
+          </div>
+
+          <div>
+            <span>Reward Rate</span>
+            <strong id="rewardRate">100%</strong>
+          </div>
+
+          <div>
+            <span>Required Rank</span>
+            <strong>Gold</strong>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- Claim -->
+    <section class="section">
+
+      <div class="section-title">
+        <div>
+          <small>CLAIM & AUTO STAKE</small>
+          <h2>เคลมรางวัล</h2>
+        </div>
+      </div>
+
+
+      <div class="claim-grid">
+
+        <div class="panel">
+
+          <div class="claim-status">
+            <span>Claim Status</span>
+
+            <strong
+              id="claimStatus"
+              class="status-warning"
+            >
+              Connect Wallet
+            </strong>
+          </div>
+
+          <div class="claim-details">
+
+            <div>
+              <span>Rank Qualified</span>
+              <strong id="rankQualified">No</strong>
+            </div>
+
+            <div>
+              <span>Volume Qualified</span>
+              <strong id="volumeQualified">No</strong>
+            </div>
+
+            <div>
+              <span>Distribution</span>
+              <strong id="distributionStatus">Checking...</strong>
+            </div>
+
+            <div>
+              <span>Claim System</span>
+              <strong id="claimPauseStatus">Checking...</strong>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="panel claim-panel">
+
+          <span class="claim-label">Available Reward</span>
+
+          <strong
+            id="claimAmountDisplay"
+            class="claim-amount"
+          >
+            0 NC
+          </strong>
+
+          <p>
+            เมื่อเคลมสำเร็จ รางวัลจะถูกนำเข้าสู่ระบบ Stake
+            365 วันโดยอัตโนมัติ
+          </p>
+
+          <button
+            id="claimAndStakeBtn"
+            class="primary-btn full-width"
+            type="button"
+            disabled
+          >
+            Claim & Auto Stake
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- Staking Summary -->
+    <section class="section">
+
+      <div class="section-title">
+        <div>
+          <small>STAKING</small>
+          <h2>สรุป Stake</h2>
+        </div>
+
+        <button
+          id="withdrawMaturedBtn"
+          class="secondary-btn"
+          type="button"
+          disabled
+        >
+          Withdraw Matured
+        </button>
+      </div>
+
+
+      <div class="staking-summary">
+
+        <div>
+          <span>Active Lots</span>
+          <strong id="activeStakeLots">0</strong>
+        </div>
+
+        <div>
+          <span>Matured Lots</span>
+          <strong id="maturedStakeLots">0</strong>
+        </div>
+
+        <div>
+          <span>Withdrawn</span>
+          <strong id="totalWithdrawn">0 NC</strong>
+        </div>
+
+        <div>
+          <span>Lock Duration</span>
+          <strong id="lockDuration">365 Days</strong>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- Stake Lots -->
+    <section class="section">
+
+      <div class="section-title">
+        <div>
+          <small>MY STAKE LOTS</small>
+          <h2>รายการ Stake</h2>
+        </div>
+
+        <span id="stakeLotCount" class="count-badge">
+          0 Lots
+        </span>
+      </div>
+
+
+      <div id="stakeLotsContainer" class="stake-list">
+
+        <div class="empty-box">
+          <div>🔒</div>
+          <strong>ยังไม่มีรายการ Stake</strong>
+          <p>
+            รายการ Stake จะแสดงหลังจากเคลมรางวัลสำเร็จ
+          </p>
+        </div>
+
+      </div>
+
+
+      <div id="stakePagination" class="pagination hidden">
+
+        <button
+          id="stakePrevBtn"
+          class="secondary-btn"
+          type="button"
+        >
+          Previous
+        </button>
+
+        <span id="stakePageText">Page 1</span>
+
+        <button
+          id="stakeNextBtn"
+          class="secondary-btn"
+          type="button"
+        >
+          Next
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- Reward History -->
+    <section class="section">
+
+      <div class="section-title">
+        <div>
+          <small>REWARD HISTORY</small>
+          <h2>ประวัติรางวัล</h2>
+        </div>
+
+        <span id="historyCount" class="count-badge">
+          0 Records
+        </span>
+      </div>
+
+
+      <div class="table-wrap">
+
+        <table class="history-table">
+
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Reward</th>
+              <th>Units</th>
+              <th>Transaction</th>
+            </tr>
+          </thead>
+
+          <tbody id="historyTableBody">
+
+            <tr>
+              <td colspan="4" class="table-empty">
+                ยังไม่มีประวัติการเคลม
+              </td>
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+
+      <div id="historyPagination" class="pagination hidden">
+
+        <button
+          id="historyPrevBtn"
+          class="secondary-btn"
+          type="button"
+        >
+          Previous
+        </button>
+
+        <span id="historyPageText">Page 1</span>
+
+        <button
+          id="historyNextBtn"
+          class="secondary-btn"
+          type="button"
+        >
+          Next
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- Owner Panel -->
+    <section id="ownerSection" class="section hidden">
+
+      <div class="section-title">
+        <div>
+          <small>OWNER PANEL</small>
+          <h2>จัดการระบบ</h2>
+        </div>
+
+        <span class="owner-badge">
+          Owner Only
+        </span>
+      </div>
+
+
+      <div class="owner-summary">
+
+        <div>
+          <span>Reward Vault Balance</span>
+          <strong id="rewardVaultBalance">0 NC</strong>
+        </div>
+
+        <div>
+          <span>Contract Owner</span>
+          <strong id="contractOwner">-</strong>
+        </div>
+
+        <div>
+          <span>Claim Paused</span>
+          <strong id="ownerClaimPauseStatus">-</strong>
+        </div>
+
+        <div>
+          <span>Distribution Paused</span>
+          <strong id="ownerDistributionPauseStatus">-</strong>
+        </div>
+
+      </div>
+
+
+      <div class="owner-grid">
+
+        <!-- Reward Rate -->
+        <div class="panel owner-card">
+
+          <h3>Reward Rate</h3>
+
+          <label for="rewardBpsInput">
+            Reward BPS
+          </label>
+
+          <input
+            id="rewardBpsInput"
+            type="number"
+            min="0"
+            placeholder="10000 = 100%"
+          >
+
+          <small>
+            ตัวอย่าง 10000 เท่ากับ 100%
+          </small>
+
+          <button
+            id="setRewardBpsBtn"
+            class="primary-btn full-width"
+            type="button"
+          >
+            Set Reward Rate
+          </button>
+
+        </div>
+
+
+        <!-- Claim Step -->
+        <div class="panel owner-card">
+
+          <h3>Claim Step</h3>
+
+          <label for="claimStepInput">
+            NC Amount
+          </label>
+
+          <input
+            id="claimStepInput"
+            type="number"
+            min="0"
+            placeholder="20000"
+          >
+
+          <small>
+            จำนวน NC ต่อหนึ่งรอบการเคลม
+          </small>
+
+          <button
+            id="setClaimStepBtn"
+            class="primary-btn full-width"
+            type="button"
+          >
+            Set Claim Step
+          </button>
+
+        </div>
+
+
+        <!-- Organization Target -->
+        <div class="panel owner-card">
+
+          <h3>Organization Target</h3>
+
+          <label for="organizationTargetInput">
+            NC Amount
+          </label>
+
+          <input
+            id="organizationTargetInput"
+            type="number"
+            min="0"
+            placeholder="20000"
+          >
+
+          <small>
+            ยอดองค์กรขั้นต่ำสำหรับการเคลม
+          </small>
+
+          <button
+            id="setOrganizationTargetBtn"
+            class="primary-btn full-width"
+            type="button"
+          >
+            Set Target
+          </button>
+
+        </div>
+
+
+        <!-- Fund Vault -->
+        <div class="panel owner-card">
+
+          <h3>Fund Reward Vault</h3>
+
+          <label for="fundVaultInput">
+            NC Amount
+          </label>
+
+          <input
+            id="fundVaultInput"
+            type="number"
+            min="0"
+            placeholder="0"
+          >
+
+          <small>
+            ต้อง Approve NC ก่อนเติมเข้าคลัง
+          </small>
+
+          <button
+            id="approveNcBtn"
+            class="secondary-btn full-width"
+            type="button"
+          >
+            Approve NC
+          </button>
+
+          <button
+            id="fundRewardVaultBtn"
+            class="primary-btn full-width"
+            type="button"
+          >
+            Fund Vault
+          </button>
+
+        </div>
+
+
+        <!-- Lock Duration -->
+        <div class="panel owner-card">
+
+          <h3>Lock Duration</h3>
+
+          <label for="lockDurationInput">
+            Number of Days
+          </label>
+
+          <input
+            id="lockDurationInput"
+            type="number"
+            min="1"
+            placeholder="365"
+          >
+
+          <small>
+            ระยะเวลาล็อกของ Stake lot ใหม่
+          </small>
+
+          <button
+            id="setLockDurationBtn"
+            class="primary-btn full-width"
+            type="button"
+          >
+            Set Lock Duration
+          </button>
+
+        </div>
+
+
+        <!-- Pause -->
+        <div class="panel owner-card">
+
+          <h3>System Controls</h3>
+
+          <button
+            id="toggleClaimPauseBtn"
+            class="danger-btn full-width"
+            type="button"
+          >
+            Pause Claim
+          </button>
+
+          <button
+            id="toggleDistributionPauseBtn"
+            class="danger-btn full-width"
+            type="button"
+          >
+            Pause Distribution
+          </button>
+
+          <small>
+            ใช้กรณีฉุกเฉินหรือปรับปรุงระบบ
+          </small>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- Contract Addresses -->
+    <section class="section">
+
+      <div class="section-title">
+        <div>
+          <small>CONTRACTS</small>
+          <h2>Contract Addresses</h2>
+        </div>
+      </div>
+
+
+      <div class="contract-list">
+
+        <div class="contract-item">
+          <div>
+            <span>NC Token</span>
+            <code id="ncTokenAddress">-</code>
+          </div>
+
+          <button
+            class="copy-btn"
+            data-copy-target="ncTokenAddress"
+            type="button"
+          >
+            Copy
+          </button>
+        </div>
+
+
+        <div class="contract-item">
+          <div>
+            <span>Legacy Core V6</span>
+            <code id="legacyCoreAddress">-</code>
+          </div>
+
+          <button
+            class="copy-btn"
+            data-copy-target="legacyCoreAddress"
+            type="button"
+          >
+            Copy
+          </button>
+        </div>
+
+
+        <div class="contract-item">
+          <div>
+            <span>Reward Core V7</span>
+            <code id="rewardCoreAddress">-</code>
+          </div>
+
+          <button
+            class="copy-btn"
+            data-copy-target="rewardCoreAddress"
+            type="button"
+          >
+            Copy
+          </button>
+        </div>
+
+
+        <div class="contract-item">
+          <div>
+            <span>Reward Vault</span>
+            <code id="rewardVaultAddress">-</code>
+          </div>
+
+          <button
+            class="copy-btn"
+            data-copy-target="rewardVaultAddress"
+            type="button"
+          >
+            Copy
+          </button>
+        </div>
+
+
+        <div class="contract-item">
+          <div>
+            <span>Reward Staking</span>
+            <code id="rewardStakingAddress">-</code>
+          </div>
+
+          <button
+            class="copy-btn"
+            data-copy-target="rewardStakingAddress"
+            type="button"
+          >
+            Copy
+          </button>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- Disclaimer -->
+    <section class="disclaimer">
+
+      <strong>ข้อควรทราบ</strong>
+
+      <p>
+        โปรดตรวจสอบเครือข่าย ที่อยู่กระเป๋า และรายละเอียดธุรกรรม
+        ก่อนยืนยันทุกครั้ง ธุรกรรมบนบล็อกเชนไม่สามารถยกเลิกได้
+      </p>
+
+    </section>
+
+  </main>
+
+
+  <footer class="footer">
+    <strong>NC Reward</strong>
+    <span>Powered by BNB Smart Chain</span>
+  </footer>
+
+
+  <!-- JavaScript -->
+  <script src="./config.js"></script>
+  <script src="./abi.js"></script>
+  <script src="./app.js"></script>
+
+</body>
+</html>
